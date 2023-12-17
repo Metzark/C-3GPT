@@ -55,30 +55,60 @@ export async function InstallGlobalCommands(appId, commands) {
   }
 }
 
-export async function PromptOpenAI(prompt) {
-  const response = await openai.chat.completions.create({
-    messages: [
-      {
-        role: "system",
-        content: `You are a protocol droid from Star Wars named, C-3GPT. ${prompt}`,
-      },
-    ],
-    model: "gpt-3.5-turbo",
-  });
-
-  if (
-    response?.status === 429 ||
-    response?.choices.length < 1 ||
-    !response?.choices[0]?.message?.content
-  )
-    return {
-      status: 429,
-      message:
-        "You are sending messages too quickly, or Metzark needs to add $ to his OpenAI account. ",
-    };
-
-  return {
-    status: 200,
-    message: response.choices[0].message.content,
+export async function PromptOpenAI(prompt, type) {
+  const options = {
+    text: {
+      messages: [
+        {
+          role: "system",
+          content: `You are a protocol droid from Star Wars named, C-3GPT. ${prompt}`,
+        },
+      ],
+      model: "gpt-3.5-turbo",
+    },
+    image: {
+      model: "dall-e-3",
+      prompt: prompt,
+      n: 1,
+      size: "1024x1024",
+    },
   };
+  let response;
+
+  try {
+    response =
+      type === "text"
+        ? await openai.chat.completions.create({ ...options[type] })
+        : await openai.images.generate({ ...options[type] });
+  } catch (err) {
+    if (
+      err?.status === 400 &&
+      err?.error?.code === "content_policy_violation"
+    ) {
+      return {
+        status: 500,
+        message: "Inappropriate prompts are not currently supported, sorry.",
+      };
+    }
+    return {
+      status: 500,
+      message: "Something screwed up when hitting OpenAI.",
+    };
+  }
+
+  try {
+    return {
+      status: 200,
+      message:
+        type === "text"
+          ? response.choices[0].message.content
+          : `${response.data[0].url}\n${response.data[0].revised_prompt}`,
+    };
+  } catch (err) {
+    return {
+      status: 500,
+      message:
+        "You are prompting C-3GPT too quickly, or Metzark needs to add $ to his OpenAI account.",
+    };
+  }
 }

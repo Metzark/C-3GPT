@@ -15,6 +15,20 @@ const CHAT_COMMAND = {
   type: 1,
 };
 
-const ALL_COMMANDS = [CHAT_COMMAND];
+const IMAGE_COMMAND = {
+  name: "image",
+  description: "Create an image with C-3GPT",
+  options: [
+    {
+      type: 3,
+      name: "prompt",
+      description: "Prompt for C-3PT image",
+      required: true,
+    },
+  ],
+  type: 1,
+};
+
+const ALL_COMMANDS = [CHAT_COMMAND, IMAGE_COMMAND];
 
 InstallGlobalCommands(process.env.APP_ID, ALL_COMMANDS);

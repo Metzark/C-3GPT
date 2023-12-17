@@ -9,7 +9,7 @@ app.use(express.json({ verify: VerifyDiscordRequest(process.env.PUBLIC_KEY) }));
 
 app.post("/interactions", async function (req, res) {
   // Interaction type and data
-  const { type, id, data, token: interactionToken } = req.body;
+  const { type, data, token: interactionToken } = req.body;
 
   // Just for verification that is required when setting endpoint URL
   if (type === InteractionType.PING) {
@@ -34,7 +34,45 @@ app.post("/interactions", async function (req, res) {
 
       const asyncResponse = async (prompt) => {
         // Hit OpenAI
-        const openaiRes = await PromptOpenAI(prompt);
+        const openaiRes = await PromptOpenAI(prompt, "text");
+
+        await fetch(
+          `https://discord.com/api/v8/webhooks/${process.env.APP_ID}/${interactionToken}`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              content: openaiRes.message,
+            }),
+          }
+        );
+      };
+
+      asyncResponse(options[0].value);
+
+      // Acknowledge the request
+      return res.send({
+        type: 5,
+      });
+    }
+
+    if (name === "image") {
+      const { options } = data;
+      // Should never happen but just in case
+      if (options.length < 1 || !options[0]?.value) {
+        return res.send({
+          type: 4,
+          data: {
+            content: "Something fucked up, no prompt found...",
+          },
+        });
+      }
+
+      const asyncResponse = async (prompt) => {
+        // Hit OpenAI
+        const openaiRes = await PromptOpenAI(prompt, "image");
 
         await fetch(
           `https://discord.com/api/v8/webhooks/${process.env.APP_ID}/${interactionToken}`,
