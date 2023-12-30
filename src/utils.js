@@ -55,7 +55,7 @@ export async function InstallGlobalCommands(appId, commands) {
   }
 }
 
-export async function PromptOpenAI(prompt, type) {
+export async function PromptOpenAI(prompt, type, size) {
   const options = {
     text: {
       messages: [
@@ -70,7 +70,7 @@ export async function PromptOpenAI(prompt, type) {
       model: "dall-e-3",
       prompt: prompt,
       n: 1,
-      size: "1024x1024",
+      size: size,
     },
   };
   let response;

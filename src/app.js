@@ -70,9 +70,9 @@ app.post("/interactions", async function (req, res) {
         });
       }
 
-      const asyncResponse = async (prompt) => {
+      const asyncResponse = async (prompt, size) => {
         // Hit OpenAI
-        const openaiRes = await PromptOpenAI(prompt, "image");
+        const openaiRes = await PromptOpenAI(prompt, "image", size);
 
         await fetch(
           `https://discord.com/api/v8/webhooks/${process.env.APP_ID}/${interactionToken}`,
@@ -88,7 +88,9 @@ app.post("/interactions", async function (req, res) {
         );
       };
 
-      asyncResponse(options[0].value);
+      const size = options.length > 1 ? options[1].value : "1024x1024";
+
+      asyncResponse(options[0].value, size);
 
       // Acknowledge the request
       return res.send({

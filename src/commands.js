@@ -25,6 +25,22 @@ const IMAGE_COMMAND = {
       description: "Prompt for C-3PT image",
       required: true,
     },
+    {
+      type: 3,
+      name: "size",
+      description: "Image resolution size",
+      choices: [
+        {
+          name: "1024x1024",
+          value: "1024x1024",
+        },
+        { name: "1792x1024", value: "1792x1024" },
+        {
+          name: "1024x1792",
+          value: "1024x1792",
+        },
+      ],
+    },
   ],
   type: 1,
 };
