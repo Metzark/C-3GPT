@@ -51,6 +51,8 @@ app.post("/interactions", async function (req, res) {
       };
 
       asyncResponse(options[0].value);
+      
+      console.log(`Chat (${req?.body?.member?.user?.username}): ${options[0].value}`);
 
       // Acknowledge the request
       return res.send({
@@ -91,6 +93,7 @@ app.post("/interactions", async function (req, res) {
       const size = options.length > 1 ? options[1].value : "1024x1024";
 
       asyncResponse(options[0].value, size);
+      console.log(`Image (${req?.body?.member?.user?.username}): ${size} ${options[0].value}`);
 
       // Acknowledge the request
       return res.send({
